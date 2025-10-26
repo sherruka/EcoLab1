@@ -88,11 +88,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\HeaderFiles;..\..\..\SharedFiles;$(ECO_FRAMEWORK)\Eco.Core1\SharedFiles;$(ECO_FRAMEWORK)\Eco.InterfaceBus1\SharedFiles;$(ECO_FRAMEWORK)\Eco.System1\SharedFiles;$(ECO_FRAMEWORK)\Eco.MemoryManager1\SharedFiles;$(ECO_FRAMEWORK)\Eco.FileSystemManagement1\SharedFiles;$(ECO_FRAMEWORK)\Eco.List1\SharedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\HeaderFiles;..\..\..\SharedFiles;..\..\..\Components\SharedFiles;$(ECO_FRAMEWORK)\Eco.Core1\SharedFiles;$(ECO_FRAMEWORK)\Eco.InterfaceBus1\SharedFiles;$(ECO_FRAMEWORK)\Eco.System1\SharedFiles;$(ECO_FRAMEWORK)\Eco.MemoryManager1\SharedFiles;$(ECO_FRAMEWORK)\Eco.FileSystemManagement1\SharedFiles;$(ECO_FRAMEWORK)\Eco.List1\SharedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CallingConvention>StdCall</CallingConvention>
       <CompileAs>CompileAsC</CompileAs>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;ECO_WINDOWS;ECO_X86_32;ECO_WIN32;ECO_X86_32;UGUID_UTILITY;ECO_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -167,6 +168,13 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorA.h" />
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorB.h" />
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorC.h" />
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorD.h" />
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorE.h" />
+    <ClInclude Include="..\..\..\Components\SharedFiles\IEcoCalculatorX.h" />
+    <ClInclude Include="..\..\..\Components\SharedFiles\IEcoCalculatorY.h" />
     <ClInclude Include="..\..\..\HeaderFiles\CEcoLab1.h" />
     <ClInclude Include="..\..\..\HeaderFiles\CEcoLab1Factory.h" />
     <ClInclude Include="..\..\..\SharedFiles\IdEcoLab1.h" />

@@ -35,6 +35,27 @@
     <ClInclude Include="..\..\..\SharedFiles\IEcoLab1.h">
       <Filter>Shared Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorA.h">
+      <Filter>Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorB.h">
+      <Filter>Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorC.h">
+      <Filter>Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorD.h">
+      <Filter>Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IdEcoCalculatorE.h">
+      <Filter>Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IEcoCalculatorX.h">
+      <Filter>Shared Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Components\SharedFiles\IEcoCalculatorY.h">
+      <Filter>Shared Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\SourceFiles\CEcoLab1.c">

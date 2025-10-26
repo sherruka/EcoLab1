@@ -24,6 +24,11 @@
 #include "IdEcoInterfaceBus1.h"
 #include "IdEcoFileSystemManagement1.h"
 #include "IdEcoLab1.h"
+#include "IdEcoLab2.h"
+#include "IEcoCalculatorX.h"
+#include "IEcoCalculatorY.h"
+#include "IEcoLab1.h"
+
 
 /*
  *
@@ -246,6 +251,10 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     IEcoMemoryAllocator1* pIMem = 0;
     /* Указатель на тестируемый интерфейс */
     IEcoLab1* pIEcoLab1 = 0;
+	IEcoLab2* pIEcoLab2 = 0;
+	IEcoCalculatorX* pIX = 0;
+	IEcoCalculatorY* pIY = 0;
+	IEcoLab1* pIEcoLab1_2 = 0;
 
     /* Проверка и создание системного интрефейса */
     if (pISys == 0) {
@@ -267,9 +276,15 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     /* Регистрация статического компонента для работы со списком */
     result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoLab1, (IEcoUnknown*)GetIEcoComponentFactoryPtr_1F5DF16EE1BF43B999A434ED38FE8F3A);
     if (result != 0 ) {
-        /* Освобождение в случае ошибки */
+        printf("ERROR: Failed to register Eco.Lab1 component! Error code: %d\n", result);
         goto Release;
     }
+
+	result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoLab2, (IEcoUnknown*)GetIEcoComponentFactoryPtr_A3F9C1D2E4B5678F9A0B12C3D4E5F678);
+    if (result != 0 ) { 
+		printf("ERROR: Failed to register Eco.Lab2 component! Error code: %d\n", result);
+		goto Release; 
+	}
 #endif
     /* Получение интерфейса управления памятью */
     result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoMemoryManager1, 0, &IID_IEcoMemoryAllocator1, (void**) &pIMem);
@@ -286,206 +301,172 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
-    /* ========== ТЕСТЫ производительности и корректности ========== */
+	/* ======= ТЕСТ: Использование IEcoCalculator через IEcoLab1 ======= */
     {
-        /* Список размеров */
-        size_t sizes[] = { 1000, 10000, 100000, 500000, 1000000 };
-        size_t sizes_count = sizeof(sizes) / sizeof(sizes[0]);
-		size_t si = 0;
+        pIEcoLab1 = 0;
+		pIX = 0;
+		pIY = 0;
 
-        /* Для единообразия флаг: 1 = сортировать по возрастанию */
-        int ascending = 1;
+		// Получаем компонент
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		// Тестируем QueryInterface
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		/* Test 1 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) { 
+			printf("Addition: 5 + 3 = %d\n", pIX->pVTbl->Addition(pIX, 5, 3)); 
+			printf("Subtraction: 10 - 4 = %d\n", pIX->pVTbl->Subtraction(pIX, 10, 4)); 
+			pIX->pVTbl->Release(pIX); 
+		}
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		if (result == 0 && pIY) { 
+			printf("Multiplication: 5 * 3 = %d\n", pIY->pVTbl->Multiplication(pIY, 5, 3)); 
+			printf("Division: 6 / 3 = %d\n", pIY->pVTbl->Division(pIY, 6, 3)); 
+			pIY->pVTbl->Release(pIY); 
+		}
 
-        /* Временные переменные */
-        clock_t t0, t1;
-        double time_bitonic, time_qsort;
-        int ok;
+		/* Test 2 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) { 
+			printf("Addition: 2 + 9 = %d\n", pIX->pVTbl->Addition(pIX, 2, 9)); 
+			printf("Subtraction: -1 - (-5) = %d\n", pIX->pVTbl->Subtraction(pIX, -1, -5)); 
+			pIX->pVTbl->Release(pIX); 
+		}
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		if (result == 0 && pIY) { 
+			printf("Multiplication: 7 * 7 = %d\n", pIY->pVTbl->Multiplication(pIY, 7, 7)); 
+			printf("Division: 20 / 4 = %d\n", pIY->pVTbl->Division(pIY, 20, 4)); 
+			pIY->pVTbl->Release(pIY); 
+		}
 
-        printf("\n=== Performance tests (Bitonic vs qsort) ===\n");
+		/* Test 3 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) { 
+			printf("Addition: 123 + 321 = %d\n", pIX->pVTbl->Addition(pIX, 123, 321)); 
+			printf("Subtraction: 15 - 8 = %d\n", pIX->pVTbl->Subtraction(pIX, 15, 8)); 
+			pIX->pVTbl->Release(pIX); 
+		}
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		if (result == 0 && pIY) { 
+			printf("Multiplication: 11 * 11 = %d\n", pIY->pVTbl->Multiplication(pIY, 11, 11)); 
+			printf("Division: 100 / 25 = %d\n", pIY->pVTbl->Division(pIY, 100, 25)); 
+			pIY->pVTbl->Release(pIY); 
+		}
 
-        /* ---------- INT ---------- */
-        printf("\n-- Type: int --\n");
-        for (si = 0; si < sizes_count; ++si) {
-            size_t n = sizes[si];
+		/* Test 4 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) { 
+			printf("Addition: 8 + 12 = %d\n", pIX->pVTbl->Addition(pIX, 8, 12)); 
+			printf("Subtraction: 20 - 7 = %d\n", pIX->pVTbl->Subtraction(pIX, 20, 7)); 
+			pIX->pVTbl->Release(pIX); 
+		}
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		if (result == 0 && pIY) { 
+			printf("Multiplication: 6 * 9 = %d\n", pIY->pVTbl->Multiplication(pIY, 6, 9)); 
+			printf("Division: 45 / 5 = %d\n", pIY->pVTbl->Division(pIY, 45, 5)); 
+			pIY->pVTbl->Release(pIY); 
+		}
 
-            /* Выделяем массивы через pIMem */
-            int *arr = (int*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(int));
-            int *arr_copy = (int*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(int));
-            if (arr == 0 || arr_copy == 0) {
-                printf("int: Alloc failed for n=%Iu\n", n);
-                if (arr) pIMem->pVTbl->Free(pIMem, arr);
-                if (arr_copy) pIMem->pVTbl->Free(pIMem, arr_copy);
-                continue;
-            }
+		/* Test 5 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) { 
+			printf("Addition: 0 + 100 = %d\n", pIX->pVTbl->Addition(pIX, 0, 100)); 
+			printf("Subtraction: 50 - 25 = %d\n", pIX->pVTbl->Subtraction(pIX, 50, 25)); 
+			pIX->pVTbl->Release(pIX); 
+		}
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		if (result == 0 && pIY) { 
+			printf("Multiplication: 12 * 12 = %d\n", pIY->pVTbl->Multiplication(pIY, 12, 12)); 
+			printf("Division: 81 / 9 = %d\n", pIY->pVTbl->Division(pIY, 81, 9)); 
+			pIY->pVTbl->Release(pIY); 
+		}
 
-            /* Заполняем (для больших n ставим bigNumbers=1 для разнообразия) */
-            fill_int_array(arr, n, n >= 100000 ? 1 : 0);
-            copy_array(arr_copy, arr, sizeof(int), n);
+		/* Test 6 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) { 
+			printf("Addition: -10 + 15 = %d\n", pIX->pVTbl->Addition(pIX, -10, 15)); 
+			printf("Subtraction: 7 - 14 = %d\n", pIX->pVTbl->Subtraction(pIX, 7, 14)); 
+			pIX->pVTbl->Release(pIX); 
+		}
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		if (result == 0 && pIY) { 
+			printf("Multiplication: -3 * 6 = %d\n", pIY->pVTbl->Multiplication(pIY, -3, 6)); 
+			printf("Division: 14 / 2 = %d\n", pIY->pVTbl->Division(pIY, 14, 2)); 
+			pIY->pVTbl->Release(pIY); 
+		}
 
-            /* Bitonic */
-            t0 = clock();
-            pIEcoLab1->pVTbl->CEcoLab1_bitonicSort_int(pIEcoLab1, arr, n, ascending);
-            t1 = clock();
-            time_bitonic = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
+		// Демонстрируем свойства интерфейсов
+		printf("\nInterface properties:\n");
 
-            /* Проверка корректности (время проверки не учитываем) */
-            ok = is_sorted_int(arr, n, ascending);
+		/* Prop 1 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0; pIEcoLab1_2 = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) {
+			result = pIX->pVTbl->QueryInterface(pIX, &IID_IEcoCalculatorY, (void**)&pIY);
+			if (result == 0 && pIY) {
+				result = pIY->pVTbl->QueryInterface(pIY, &IID_IEcoLab1, (void**)&pIEcoLab1_2);
+				if (result == 0 && pIEcoLab1_2) {
+					printf("Prop1: IEcoLab1 -> IX -> IY -> IEcoLab1 OK\n");
+					printf("Example: 2 + 3 = %d\n", pIX->pVTbl->Addition(pIX, 2, 3));
+					pIEcoLab1_2->pVTbl->Release(pIEcoLab1_2);
+				}
+				pIY->pVTbl->Release(pIY);
+			}
+			pIX->pVTbl->Release(pIX);
+		}
 
-            /* qsort */
-            t0 = clock();
-            qsort(arr_copy, n, sizeof(int), cmp_int_qsort);
-            t1 = clock();
-            time_qsort = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
+		/* Prop 2 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0; pIEcoLab1_2 = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorY, (void**)&pIY);
+		if (result == 0 && pIY) {
+			result = pIY->pVTbl->QueryInterface(pIY, &IID_IEcoCalculatorX, (void**)&pIX);
+			if (result == 0 && pIX) {
+				result = pIX->pVTbl->QueryInterface(pIX, &IID_IEcoLab1, (void**)&pIEcoLab1_2);
+				if (result == 0 && pIEcoLab1_2) {
+					printf("Prop2: IEcoLab1 -> IY -> IX -> IEcoLab1 OK\n");
+					printf("Example: 10 - 4 = %d\n", pIX->pVTbl->Subtraction(pIX, 10, 4));
+					pIEcoLab1_2->pVTbl->Release(pIEcoLab1_2);
+				}
+				pIX->pVTbl->Release(pIX);
+			}
+			pIY->pVTbl->Release(pIY);
+		}
 
-            /* Вывод результатов */
-            printf("n=%8Iu : bitonic=%.3f s, qsort=%.3f s, bitonic_ok=%s\n",
-                n, time_bitonic, time_qsort, ok ? "YES" : "NO");
-
-            /* Освобождение */
-            pIMem->pVTbl->Free(pIMem, arr);
-            pIMem->pVTbl->Free(pIMem, arr_copy);
-        }
-
-        /* ---------- LONG ---------- */
-        printf("\n-- Type: long --\n");
-        for (si = 0; si < sizes_count; ++si) {
-            size_t n = sizes[si];
-            long *arr = (long*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(long));
-            long *arr_copy = (long*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(long));
-            if (arr == 0 || arr_copy == 0) {
-                printf("long: Alloc failed for n=%Iu\n", n);
-                if (arr) pIMem->pVTbl->Free(pIMem, arr);
-                if (arr_copy) pIMem->pVTbl->Free(pIMem, arr_copy);
-                continue;
-            }
-
-            fill_long_array(arr, n, n >= 100000 ? 1 : 0);
-            copy_array(arr_copy, arr, sizeof(long), n);
-
-            t0 = clock();
-            pIEcoLab1->pVTbl->CEcoLab1_bitonicSort_long(pIEcoLab1, arr, n, ascending);
-            t1 = clock();
-            time_bitonic = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-            ok = is_sorted_long(arr, n, ascending);
-
-            t0 = clock();
-            qsort(arr_copy, n, sizeof(long), cmp_long_qsort);
-            t1 = clock();
-            time_qsort = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-
-            printf("n=%8Iu : bitonic=%.3f s, qsort=%.3f s, bitonic_ok=%s\n",
-                n, time_bitonic, time_qsort, ok ? "YES" : "NO");
-
-            pIMem->pVTbl->Free(pIMem, arr);
-            pIMem->pVTbl->Free(pIMem, arr_copy);
-        }
-
-        /* ---------- FLOAT ---------- */
-        printf("\n-- Type: float --\n");
-        for (si = 0; si < sizes_count; ++si) {
-            size_t n = sizes[si];
-            float *arr = (float*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(float));
-            float *arr_copy = (float*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(float));
-            if (arr == 0 || arr_copy == 0) {
-                printf("float: Alloc failed for n=%Iu\n", n);
-                if (arr) pIMem->pVTbl->Free(pIMem, arr);
-                if (arr_copy) pIMem->pVTbl->Free(pIMem, arr_copy);
-                continue;
-            }
-
-            fill_float_array(arr, n, n >= 100000 ? 1 : 0);
-            copy_array(arr_copy, arr, sizeof(float), n);
-
-            t0 = clock();
-            pIEcoLab1->pVTbl->CEcoLab1_bitonicSort_float(pIEcoLab1, arr, n, ascending);
-            t1 = clock();
-            time_bitonic = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-            ok = is_sorted_float(arr, n, ascending);
-
-            t0 = clock();
-            qsort(arr_copy, n, sizeof(float), cmp_float_qsort);
-            t1 = clock();
-            time_qsort = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-
-            printf("n=%8Iu : bitonic=%.3f s, qsort=%.3f s, bitonic_ok=%s\n",
-                n, time_bitonic, time_qsort, ok ? "YES" : "NO");
-
-            pIMem->pVTbl->Free(pIMem, arr);
-            pIMem->pVTbl->Free(pIMem, arr_copy);
-        }
-
-        /* ---------- DOUBLE ---------- */
-        printf("\n-- Type: double --\n");
-        for (si = 0; si < sizes_count; ++si) {
-            size_t n = sizes[si];
-            double *arr = (double*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(double));
-            double *arr_copy = (double*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(double));
-            if (arr == 0 || arr_copy == 0) {
-                printf("double: Alloc failed for n=%Iu\n", n);
-                if (arr) pIMem->pVTbl->Free(pIMem, arr);
-                if (arr_copy) pIMem->pVTbl->Free(pIMem, arr_copy);
-                continue;
-            }
-
-            fill_double_array(arr, n, n >= 100000 ? 1 : 0);
-            copy_array(arr_copy, arr, sizeof(double), n);
-
-            t0 = clock();
-            pIEcoLab1->pVTbl->CEcoLab1_bitonicSort_double(pIEcoLab1, arr, n, ascending);
-            t1 = clock();
-            time_bitonic = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-            ok = is_sorted_double(arr, n, ascending);
-
-            t0 = clock();
-            qsort(arr_copy, n, sizeof(double), cmp_double_qsort);
-            t1 = clock();
-            time_qsort = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-
-            printf("n=%8Iu : bitonic=%.3f s, qsort=%.3f s, bitonic_ok=%s\n",
-                n, time_bitonic, time_qsort, ok ? "YES" : "NO");
-
-            pIMem->pVTbl->Free(pIMem, arr);
-            pIMem->pVTbl->Free(pIMem, arr_copy);
-        }
-
-		/* ---------- LONG DOUBLE ---------- */
-		printf("\n-- Type: long double --\n");
-		for (si = 0; si < sizes_count; ++si) {
-            size_t n = sizes[si];
-            long double *arr = (long double*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(long double));
-            long double *arr_copy = (long double*)pIMem->pVTbl->Alloc(pIMem, n * sizeof(long double));
-            if (arr == 0 || arr_copy == 0) {
-                printf("long double: Alloc failed for n=%Iu\n", n);
-                if (arr) pIMem->pVTbl->Free(pIMem, arr);
-                if (arr_copy) pIMem->pVTbl->Free(pIMem, arr_copy);
-                continue;
-            }
-
-            fill_longdouble_array(arr, n, n >= 100000 ? 1 : 0);
-            copy_array(arr_copy, arr, sizeof(long double), n);
-
-            t0 = clock();
-            pIEcoLab1->pVTbl->CEcoLab1_bitonicSort_longdouble(pIEcoLab1, arr, n, ascending);
-            t1 = clock();
-            time_bitonic = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-            ok = is_sorted_longdouble(arr, n, ascending);
-
-            t0 = clock();
-            qsort(arr_copy, n, sizeof(long double), cmp_longdouble_qsort);
-            t1 = clock();
-            time_qsort = (double)(t1 - t0) / (double)CLOCKS_PER_SEC;
-
-            printf("n=%8Iu : bitonic=%.3f s, qsort=%.3f s, bitonic_ok=%s\n",
-                n, time_bitonic, time_qsort, ok ? "YES" : "NO");
-
-            pIMem->pVTbl->Free(pIMem, arr);
-            pIMem->pVTbl->Free(pIMem, arr_copy);
-        }
-
-        printf("\n=== Tests finished ===\n");
-
-		result = 0;
+		/* Prop 3 */
+		pIEcoLab1 = 0; pIX = 0; pIY = 0; pIEcoLab1_2 = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
+		result = pIEcoLab1->pVTbl->QueryInterface(pIEcoLab1, &IID_IEcoCalculatorX, (void**)&pIX);
+		if (result == 0 && pIX) {
+			result = pIX->pVTbl->QueryInterface(pIX, &IID_IEcoCalculatorY, (void**)&pIY);
+			if (result == 0 && pIY) {
+				result = pIY->pVTbl->QueryInterface(pIY, &IID_IEcoCalculatorX, (void**)&pIX);
+				if (result == 0 && pIX) {
+					printf("Prop5: IX -> IY -> IX OK\n");
+					printf("Example: 9 - 4 = %d\n", pIX->pVTbl->Subtraction(pIX, 9, 4));
+					pIX->pVTbl->Release(pIX);
+				}
+				pIY->pVTbl->Release(pIY);
+			}
+			pIX->pVTbl->Release(pIX);
+		}
     }
+
+
 
 
 Release:
@@ -505,6 +486,17 @@ Release:
         pIEcoLab1->pVTbl->Release(pIEcoLab1);
     }
 
+	if (pIEcoLab1_2) { 
+		pIEcoLab1_2->pVTbl->Release(pIEcoLab1_2);
+	}
+
+	if (pIX) { 
+		pIX->pVTbl->Release(pIX);
+	}
+
+    if (pIY) { 
+		pIY->pVTbl->Release(pIY);
+	}
 
     /* Освобождение системного интерфейса */
     if (pISys != 0) {

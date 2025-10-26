@@ -1,0 +1,114 @@
+ifeq ($(OS), Windows_NT)
+	#WINDOWS USE THESE DEFINITIONS
+	RM = -rm -f
+	SLASH = \\
+	SWALLOW_OUTPUT = >nul 2>nul
+	TOOLCHAIN = $(ECO_TOOLCHAIN)
+	TOOL = arm-none-eabi-
+	GNU = $(TOOLCHAIN)/xpack-arm-none-eabi-gcc-13.2.1-1.1/bin/
+	ECO = $(TOOLCHAIN)/eco_tools_1_0_0/
+else
+	#LINUX USE THESE DEFINITIONS
+	RM = -rm -f
+	SLASH = /
+	SWALLOW_OUTPUT =
+	TOOLCHAIN = $(ECO_TOOLCHAIN)
+	TOOL = arm-none-eabi-
+	GNU = $(TOOLCHAIN)/xpack-arm-none-eabi-gcc-13.2.1-1.1/bin/
+	ECO = $(TOOLCHAIN)/eco_tools_1_0_0/
+endif 
+
+# configuration
+PLATFORM_TARGET=EcoOS
+ARCH_TARGET=arm-v7m
+DEVICE_TARGET=
+
+ifeq ($(TARGET), 1)
+OUT_TARGET = Lab2
+ifeq ($(DEBUG), 1)
+CONFIG_TARGET = StaticDebug
+CCFLAGS_TARGET = -Wall -g -DECO_LIB
+LDFLAGS_TARGET =
+else
+CONFIG_TARGET = StaticRelease
+CCFLAGS_TARGET = -O3 -DECO_LIB
+LDFLAGS_TARGET =
+endif
+else
+# Configuration not supported...
+endif
+
+# source files.
+SRC = \
+..$(SLASH)..$(SLASH)..$(SLASH)SourceFiles$(SLASH)EcoStartup1.c \
+..$(SLASH)..$(SLASH)..$(SLASH)SourceFiles$(SLASH)arm$(SLASH)startup.c
+# ASM source files.
+#SRCS = \
+#..$(SLASH)..$(SLASH)..$(SLASH)SourceFiles$(SLASH)arm$(SLASH)startup.S
+
+# linker file
+LINKERFILE = ..$(SLASH)..$(SLASH)..$(SLASH)SourceFiles$(SLASH)arm$(SLASH)linker.ld
+
+# include directories
+INC = \
+-I ..$(SLASH)..$(SLASH)..$(SLASH)HeaderFiles \
+-I ..$(SLASH)..$(SLASH)..$(SLASH)SharedFiles \
+-I $(ECO_FRAMEWORK)$(SLASH)Eco.Core1$(SLASH)SharedFiles \
+-I $(ECO_FRAMEWORK)$(SLASH)Eco.InterfaceBus1$(SLASH)SharedFiles \
+-I $(ECO_FRAMEWORK)$(SLASH)Eco.TaskScheduler1$(SLASH)SharedFiles \
+-I $(ECO_FRAMEWORK)$(SLASH)EcoOS.Kernel$(SLASH)SharedFiles \
+-I $(ECO_FRAMEWORK)$(SLASH)Eco.MemoryManager1$(SLASH)SharedFiles \
+-I $(ECO_FRAMEWORK)$(SLASH)Eco.FileSystemManagement1$(SLASH)SharedFiles
+
+
+# libraries directories
+LIB_DIR = \
+-L ..$(SLASH)..$(SLASH)..$(SLASH)BuildFiles$(SLASH)EcoOS$(SLASH)$(ARCH_TARGET)$(SLASH)$(CONFIG_TARGET) \
+-L $(ECO_FRAMEWORK)$(SLASH)Eco.InterfaceBus1$(SLASH)BuildFiles$(SLASH)EcoOS$(SLASH)$(ARCH_TARGET)$(SLASH)StaticRelease \
+-L $(ECO_FRAMEWORK)$(SLASH)Eco.FileSystemManagement1$(SLASH)BuildFiles$(SLASH)EcoOS$(SLASH)$(ARCH_TARGET)$(SLASH)StaticRelease \
+-L $(ECO_FRAMEWORK)$(SLASH)Eco.MemoryManager1$(SLASH)BuildFiles$(SLASH)EcoOS$(SLASH)$(ARCH_TARGET)$(SLASH)StaticRelease \
+-L $(ECO_FRAMEWORK)$(SLASH)Eco.System1$(SLASH)BuildFiles$(SLASH)EcoOS$(SLASH)$(ARCH_TARGET)$(SLASH)StaticRelease
+
+
+OBJ = $(SRC:.c=.o)
+OBJS = $(SRCS:.S=.o)
+
+OUT_ELF = EcoOS1.elf
+OUT_BIN = EcoOS1.bin
+OUT_HEX = EcoOS1.hex
+OUT_MAP = EcoOS1.map
+OUT_DIR = ..$(SLASH)..$(SLASH)..$(SLASH)BuildFiles$(SLASH)$(PLATFORM_TARGET)$(SLASH)$(ARCH_TARGET)$(SLASH)$(DEVICE_TARGET)$(SLASH)$(CONFIG_TARGET)
+
+# C++ compiler flags (-g -O2 -Wall)
+CCFLAGS = -g -Wall -Wno-missing-braces -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -DECO_LIB -DECO_OS -DUGUID_UTILITY -nostdlib -nostartfiles
+
+# compiler
+CC = $(TOOL)gcc
+AR = $(TOOL)gcc-ar
+OC = $(TOOL)objcopy
+LD = $(TOOL)ld
+EL = $(ECO)ecol1
+
+# library paths
+LIBS = $(LIB_DIR) -lD39330A106574FC38508EC1C37BBB18A
+
+
+# compile flags
+LDFLAGS = -nostdlib $(LIBS) 
+.SUFFIXES: .c
+
+.c.o:
+	$(GNU)$(CC) $(INC) $(CCFLAGS) -c $< -o $@ 
+
+.S.o:
+	$(GNU)$(CC) $(INC) -D__ASSEMBLY__  $(CCFLAGS)  -o $@ $< -c 
+
+
+$(OUT_ELF): $(OBJ) $(OBJS)
+	mkdir -p $(OUT_DIR)
+	$(GNU)$(LD) ${LDFLAGS} -T$(LINKERFILE) -o $(OUT_DIR)\$(OUT_ELF) $(OBJ) $(OBJS) -Map $(OUT_MAP) ${LDFLAGS}
+	$(GNU)$(OC) --output-format=binary $(OUT_DIR)\$(OUT_ELF) $(OUT_DIR)\$(OUT_BIN)
+	rm $(OBJ) $(OBJS)
+
+clean:
+	rm $(OBJ) $(OBJS) $(OUT_DIR)/$(OUT)
