@@ -272,6 +272,7 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
+
 #ifdef ECO_LIB
     /* Регистрация статического компонента для работы со списком */
     result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoLab1, (IEcoUnknown*)GetIEcoComponentFactoryPtr_1F5DF16EE1BF43B999A434ED38FE8F3A);
@@ -280,12 +281,21 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
-	result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoLab2, (IEcoUnknown*)GetIEcoComponentFactoryPtr_A3F9C1D2E4B5678F9A0B12C3D4E5F678);
+	result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoLab2, (IEcoUnknown*)GetIEcoComponentFactoryPtr_A1B2C3D4E5F647A890ABCDEF12345678);
     if (result != 0 ) { 
 		printf("ERROR: Failed to register Eco.Lab2 component! Error code: %d\n", result);
 		goto Release; 
 	}
 #endif
+
+#ifdef ECO_DLL
+	result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoLab2, (IEcoUnknown*)GetIEcoComponentFactoryPtr());
+    if (result != 0 ) { 
+		printf("ERROR: Failed to register Eco.Lab2 component! Error code: %d\n", result);
+		goto Release; 
+	}
+#endif
+
     /* Получение интерфейса управления памятью */
     result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoMemoryManager1, 0, &IID_IEcoMemoryAllocator1, (void**) &pIMem);
     /* Проверка */
@@ -306,6 +316,8 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         pIEcoLab1 = 0;
 		pIX = 0;
 		pIY = 0;
+
+		printf("\n========== LAB1 TESTS ==========\n\n");
 
 		// Получаем компонент
 		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
@@ -464,8 +476,163 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
 			}
 			pIX->pVTbl->Release(pIX);
 		}
+
+		printf("\n========== END LAB1 TESTS ==========\n\n");
     }
 
+
+	/* ======= ТЕСТ: Использование IEcoLab2 и агрегированного EcoLab1 ======= */
+    {
+		IEcoCalculatorX* pIX_Lab2 = 0;
+		IEcoCalculatorY* pIY_Lab2 = 0;
+		IEcoLab1* pIEcoLab1_FromLab2 = 0;
+		pIEcoLab2 = 0;
+
+		printf("\n========== LAB2 TESTS ==========\n\n");
+
+		/* ======= TEST 1: Базовые операции Lab2 (Bitonic Sort для int) ======= */
+		printf("--- Test 1: Lab2 bitonicSort_int ---\n");
+		pIEcoLab2 = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab2, 0, &IID_IEcoLab2, (void**)&pIEcoLab2);
+		if (result == 0 && pIEcoLab2) {
+			int arr1[5] = { 50, 20, 80, 10, 30 };
+			size_t i;
+			printf("Original: ");
+			for (i = 0; i < 5; i++) printf("%d ", arr1[i]);
+			printf("\n");
+			
+			result = pIEcoLab2->pVTbl->CEcoLab2_bitonicSort_int(pIEcoLab2, arr1, 5, 1); // ascending
+			printf("Sorted: ");
+			for (i = 0; i < 5; i++) printf("%d ", arr1[i]);
+			printf("\n");
+			pIEcoLab2->pVTbl->Release(pIEcoLab2);
+		}
+
+
+		/* ======= TEST 2: Lab2 Calculator X operations via QueryInterface ======= */
+		printf("\n--- Test 2: Lab2 as IEcoCalculatorX (from IEcoLab2) ---\n");
+		pIEcoLab2 = 0;
+		pIX_Lab2 = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab2, 0, &IID_IEcoLab2, (void**)&pIEcoLab2);
+		if (result == 0 && pIEcoLab2) {
+			result = pIEcoLab2->pVTbl->QueryInterface(pIEcoLab2, &IID_IEcoCalculatorX, (void**)&pIX_Lab2);
+			if (result == 0 && pIX_Lab2) {
+				printf("Addition: 25 + 15 = %d\n", pIX_Lab2->pVTbl->Addition(pIX_Lab2, 25, 15));
+				printf("Subtraction: 50 - 20 = %d\n", pIX_Lab2->pVTbl->Subtraction(pIX_Lab2, 50, 20));
+				pIX_Lab2->pVTbl->Release(pIX_Lab2);
+			}
+			pIEcoLab2->pVTbl->Release(pIEcoLab2);
+		}
+
+		/* ======= TEST 3: Lab2 Calculator Y operations via QueryInterface ======= */
+		printf("\n--- Test 3: Lab2 as IEcoCalculatorY (from IEcoLab2) ---\n");
+		pIEcoLab2 = 0;
+		pIY_Lab2 = 0;
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab2, 0, &IID_IEcoLab2, (void**)&pIEcoLab2);
+		if (result == 0 && pIEcoLab2) {
+			result = pIEcoLab2->pVTbl->QueryInterface(pIEcoLab2, &IID_IEcoCalculatorY, (void**)&pIY_Lab2);
+			if (result == 0 && pIY_Lab2) {
+				printf("Multiplication: 12 * 8 = %d\n", pIY_Lab2->pVTbl->Multiplication(pIY_Lab2, 12, 8));
+				printf("Division: 100 / 4 = %d\n", pIY_Lab2->pVTbl->Division(pIY_Lab2, 100, 4));
+				pIY_Lab2->pVTbl->Release(pIY_Lab2);
+			}
+			pIEcoLab2->pVTbl->Release(pIEcoLab2);
+		}
+
+		/* ======= TEST 4: QueryInterface chain X -> Y -> Lab2 -> Lab1 (aggregation) ======= */
+		printf("\n--- Test 4: QueryInterface chain - ILab2 -> IX -> IY -> ILab1 ---\n");
+		pIEcoLab2 = 0;
+		pIX_Lab2 = 0;
+		pIY_Lab2 = 0;
+		pIEcoLab1_FromLab2 = 0;
+		
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab2, 0, &IID_IEcoLab2, (void**)&pIEcoLab2);
+		if (result == 0 && pIEcoLab2) {
+			// Get IX from Lab2
+			result = pIEcoLab2->pVTbl->QueryInterface(pIEcoLab2, &IID_IEcoCalculatorX, (void**)&pIX_Lab2);
+			if (result == 0 && pIX_Lab2) {
+				// Get IY from IX
+				result = pIX_Lab2->pVTbl->QueryInterface(pIX_Lab2, &IID_IEcoCalculatorY, (void**)&pIY_Lab2);
+				if (result == 0 && pIY_Lab2) {
+					// Get ILab2 from IY
+					result = pIY_Lab2->pVTbl->QueryInterface(pIY_Lab2, &IID_IEcoLab1, (void**)&pIEcoLab1_FromLab2);
+					if (result == 0 && pIEcoLab1_FromLab2) {
+						// Get ILab1 from ILab2
+						if (result == 0 && pIEcoLab1_FromLab2) {
+							int arr1[3] = { 4, 3, 7 };
+							int i;
+							printf("Step 1 - IX Addition: 10 + 5 = %d\n", pIX_Lab2->pVTbl->Addition(pIX_Lab2, 10, 5));
+							printf("Step 2 - IY Multiplication: 10 * 5 = %d\n", pIY_Lab2->pVTbl->Multiplication(pIY_Lab2, 10, 5));
+							printf("Step 3 - Lab1: sort [4, 3, 7] = ", pIEcoLab1_FromLab2->pVTbl->CEcoLab1_bitonicSort_int(pIEcoLab1_FromLab2, arr1, 3, 1));
+							for (i = 0; i < 3; i++) printf("%d ", arr1[i]);
+							printf("\nSuccessfully traversed: ILab2 -> IX -> IY -> ILab1\n");
+						}
+						pIEcoLab1_FromLab2->pVTbl->Release(pIEcoLab1_FromLab2);	
+					}
+					pIY_Lab2->pVTbl->Release(pIY_Lab2);
+				}
+				pIX_Lab2->pVTbl->Release(pIX_Lab2);
+			}
+			pIEcoLab2->pVTbl->Release(pIEcoLab2);
+		}
+
+		/* ======= TEST 5: Access aggregated Lab1 from Lab2 ======= */
+		printf("\n--- Test 5: Access aggregated EcoLab1 from Lab2 via QueryInterface ---\n");
+		pIEcoLab2 = 0;
+		pIEcoLab1_FromLab2 = 0;
+		
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab2, 0, &IID_IEcoLab2, (void**)&pIEcoLab2);
+		if (result == 0 && pIEcoLab2) {
+			// Try to get Lab1 interface from Lab2 (should work via aggregation)
+			result = pIEcoLab2->pVTbl->QueryInterface(pIEcoLab2, &IID_IEcoLab1, (void**)&pIEcoLab1_FromLab2);
+			if (result == 0 && pIEcoLab1_FromLab2) {
+				int arr_test[3] = { 30, 10, 20 };
+				size_t i;
+				printf("Successfully retrieved aggregated IEcoLab1 from Lab2!\n");
+				printf("Lab1 array before sort: ");
+				for (i = 0; i < 3; i++) printf("%d ", arr_test[i]);
+				printf("\n");
+				
+				pIEcoLab1_FromLab2->pVTbl->CEcoLab1_bitonicSort_int(pIEcoLab1_FromLab2, arr_test, 3, 1);
+				printf("Lab1 array after sort: ");
+				for (i = 0; i < 3; i++) printf("%d ", arr_test[i]);
+				printf("\n");
+				
+				pIEcoLab1_FromLab2->pVTbl->Release(pIEcoLab1_FromLab2);
+			} else {
+				printf("Note: Aggregated Lab1 not available or not registered\n");
+			}
+			pIEcoLab2->pVTbl->Release(pIEcoLab2);
+		}
+
+		/* ======= TEST 6: Interface properties - cross-interface operations ======= */
+		printf("\n--- Test 6: Lab2 Interface Properties (IX -> IY -> IX cycles) ---\n");
+		pIEcoLab2 = 0;
+		pIX_Lab2 = 0;
+		pIY_Lab2 = 0;
+		
+		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab2, 0, &IID_IEcoLab2, (void**)&pIEcoLab2);
+		if (result == 0 && pIEcoLab2) {
+			result = pIEcoLab2->pVTbl->QueryInterface(pIEcoLab2, &IID_IEcoCalculatorX, (void**)&pIX_Lab2);
+			if (result == 0 && pIX_Lab2) {
+				printf("Addition: 7 + 3 = %d\n", pIX_Lab2->pVTbl->Addition(pIX_Lab2, 7, 3));
+				
+				result = pIX_Lab2->pVTbl->QueryInterface(pIX_Lab2, &IID_IEcoCalculatorY, (void**)&pIY_Lab2);
+				if (result == 0 && pIY_Lab2) {
+					printf("Multiplication: 7 * 3 = %d\n", pIY_Lab2->pVTbl->Multiplication(pIY_Lab2, 7, 3));
+					
+					// Cycle back
+					result = pIY_Lab2->pVTbl->QueryInterface(pIY_Lab2, &IID_IEcoCalculatorX, (void**)&pIX_Lab2);
+					if (result == 0 && pIX_Lab2) {
+						printf("Subtraction (cycled back): 7 - 3 = %d\n", pIX_Lab2->pVTbl->Subtraction(pIX_Lab2, 7, 3));
+					}
+					pIY_Lab2->pVTbl->Release(pIY_Lab2);
+				}
+				pIX_Lab2->pVTbl->Release(pIX_Lab2);
+			}
+			pIEcoLab2->pVTbl->Release(pIEcoLab2);
+		}
+	}
 
 
 
@@ -505,4 +672,5 @@ Release:
 
     return result;
 }
+
 

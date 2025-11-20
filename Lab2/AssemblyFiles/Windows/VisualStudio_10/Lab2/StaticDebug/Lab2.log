@@ -1,0 +1,24 @@
+﻿Build started 20.11.2025 11:29:37.
+     1>Project "C:\Users\User\lab3\EcoLab1\Lab2\AssemblyFiles\Windows\VisualStudio_10\Lab2.vcxproj" on node 3 (rebuild target(s)).
+     1>_PrepareForClean:
+         Deleting file "Lab2\StaticDebug\Lab2.lastbuildstate".
+       InitializeBuildStatus:
+         Creating "Lab2\StaticDebug\Lab2.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /IC:\Users\User\lab3\EcoLab1\Lab2\AssemblyFiles\Windows\VisualStudio_10\..\..\..\..\Components\SharedFiles /IC:\Users\User\lab3\EcoLab1\Lab2\AssemblyFiles\Windows\VisualStudio_10\..\..\..\SharedFiles /IC:\Users\User\lab3\EcoLab1\Lab2\AssemblyFiles\Windows\VisualStudio_10\..\..\..\..\SharedFiles /IC:\Users\User\lab3\EcoLab1\Lab2\AssemblyFiles\Windows\VisualStudio_10\..\..\..\HeaderFiles /IC:\eco\Eco.Framework\Eco.Core1\SharedFiles /IC:\eco\Eco.Framework\Eco.InterfaceBus1\SharedFiles /IC:\eco\Eco.Framework\Eco.System1\SharedFiles /IC:\eco\Eco.Framework\Eco.MemoryManager1\SharedFiles /IC:\eco\Eco.Framework\Eco.FileSystemManagement1\SharedFiles /IC:\eco\Eco.Framework\Eco.List1\SharedFiles /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D ECO_WINDOWS /D ECO_X86_32 /D ECO_WIN32 /D UGUID_UTILITY /D ECO_LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Lab2\StaticDebug\\" /Fd"Lab2\StaticDebug\vc100.pdb" /Gz /TC /analyze- /errorReport:prompt ..\..\..\SourceFiles\CEcoLab2.c ..\..\..\SourceFiles\CEcoLab2Factory.c
+         CEcoLab2Factory.c
+         CEcoLab2.c
+         Generating Code...
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(1151,5): warning MSB8012: TargetPath(C:\Users\User\lab3\EcoLab1\AssemblyFiles\Windows\VisualStudio_10\Lab2\StaticDebug\D39330A106574FC38508EC1C37BBB18A.lib) does not match the Library's OutputFile property value (C:\Users\User\lab3\EcoLab1\Lab2\BuildFiles\Windows\x86\StaticDebug\D39330A106574FC38508EC1C37BBB18A.lib). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"..\..\..\BuildFiles\Windows\x86\StaticDebug\D39330A106574FC38508EC1C37BBB18A.lib" /NOLOGO Lab2\StaticDebug\CEcoLab2.obj
+         Lab2\StaticDebug\CEcoLab2Factory.obj
+         Lab2.vcxproj -> C:\Users\User\lab3\EcoLab1\AssemblyFiles\Windows\VisualStudio_10\Lab2\StaticDebug\D39330A106574FC38508EC1C37BBB18A.lib
+       FinalizeBuildStatus:
+         Deleting file "Lab2\StaticDebug\Lab2.unsuccessfulbuild".
+         Touching "Lab2\StaticDebug\Lab2.lastbuildstate".
+     1>Done Building Project "C:\Users\User\lab3\EcoLab1\Lab2\AssemblyFiles\Windows\VisualStudio_10\Lab2.vcxproj" (rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.32
