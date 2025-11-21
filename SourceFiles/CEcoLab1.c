@@ -1,4 +1,4 @@
-﻿	/*
+﻿/*
  * <кодировка символов>
  *   Cyrillic (UTF-8 with signature) - Codepage 65001
  * </кодировка символов>
@@ -26,6 +26,8 @@
 #include "IdEcoCalculatorC.h"  // CID компонента C
 #include "IdEcoCalculatorB.h"  // CID компонента B
 #include "IdEcoCalculatorA.h"  // CID компонента A
+#include "CEcoLab1EnumConnectionPoints.h"
+#include "IEcoLab1Events.h"
 
 /*
  *
@@ -228,6 +230,10 @@ int16_t ECOCALLMETHOD CEcoLab1_NondelegatingQueryInterface(struct IEcoUnknown* m
         *ppv = &pCMe->m_pVTblIEcoLab1;
         pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
     }
+    else if (IsEqualUGUID(riid, &IID_IEcoConnectionPointContainer)) {
+        *ppv = &pCMe->m_pVTblICPC;
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+    }
 	else if (IsEqualUGUID(riid, &IID_IEcoCalculatorX)) {
         // АГРЕГИРОВАНИЕ: если есть внутренний компонент B - передаем запрос ему
         if (pCMe->m_pInnerUnknown != 0) {
@@ -286,6 +292,261 @@ uint32_t ECOCALLMETHOD CEcoLab1_NondelegatingRelease(struct IEcoUnknown* me) {
 /*
  *
  * <сводка>
+ *   Функция QueryInterface для интерфейса IEcoConnectionPointContainer
+ * </сводка>
+ *
+ * <описание>
+ *   Функция QueryInterface для интерфейса IEcoConnectionPointContainer
+ * </описание>
+ *
+ */
+int16_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_QueryInterface(/* in */ struct IEcoConnectionPointContainer* me, /* in */ const UGUID* riid, /* out */ void** ppv) {
+    CEcoLab1 *pCMe = (CEcoLab1*)((uint64_t)me - sizeof(struct IEcoLab1*) - sizeof(struct IEcoCalculatorY*) - sizeof(struct IEcoCalculatorX*) - sizeof(struct IEcoUnknown*));
+
+    IEcoUnknown* nonDelegate = (IEcoUnknown*)&pCMe->m_pVTblINondelegatingUnk;
+    int16_t result;
+
+    if (me == 0 || ppv == 0) return -1;
+    
+    result = nonDelegate->pVTbl->QueryInterface(nonDelegate, riid, ppv);
+    if (result != 0 && pCMe->m_pIUnkOuter != 0) {
+        result = pCMe->m_pIUnkOuter->pVTbl->QueryInterface(pCMe->m_pIUnkOuter, riid, ppv);
+    }
+    return result;
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция AddRef для интерфейса IEcoConnectionPointContainer
+ * </сводка>
+ *
+ * <описание>
+ *   Функция AddRef для интерфейса IEcoConnectionPointContainer
+ * </описание>
+ *
+ */
+uint32_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_AddRef(/* in */ struct IEcoConnectionPointContainer* me) {
+    CEcoLab1 *pCMe = (CEcoLab1*)((uint64_t)me - sizeof(struct IEcoLab1*) - sizeof(struct IEcoCalculatorY*) - sizeof(struct IEcoCalculatorX*) - sizeof(struct IEcoUnknown*));
+
+    if (me == 0 ) {
+        return -1;
+    }
+
+    return pCMe->m_pVTblINondelegatingUnk->AddRef((IEcoUnknown*)&pCMe->m_pVTblINondelegatingUnk);
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция Release для интерфейса IEcoConnectionPointContainer
+ * </сводка>
+ *
+ * <описание>
+ *   Функция Release для интерфейса IEcoConnectionPointContainer
+ * </описание>
+ *
+ */
+uint32_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_Release(/* in */ struct IEcoConnectionPointContainer* me) {
+    CEcoLab1 *pCMe = (CEcoLab1*)((uint64_t)me - sizeof(struct IEcoLab1*) - sizeof(struct IEcoCalculatorY*) - sizeof(struct IEcoCalculatorX*) - sizeof(struct IEcoUnknown*));
+
+    if (me == 0 ) {
+        return -1;
+    }
+
+    return pCMe->m_pVTblINondelegatingUnk->Release((IEcoUnknown*)&pCMe->m_pVTblINondelegatingUnk);
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция EnumConnectionPoints
+ * </сводка>
+ *
+ * <описание>
+ *   Перечисляет все точки подключения компонента
+ * </описание>
+ *
+ */
+int16_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_EnumConnectionPoints(/* in */ struct IEcoConnectionPointContainer* me, /* out */ struct IEcoEnumConnectionPoints **ppEnum) {
+    CEcoLab1 *pCMe = (CEcoLab1*)((uint64_t)me - sizeof(struct IEcoLab1*) - sizeof(struct IEcoCalculatorY*) - sizeof(struct IEcoCalculatorX*) - sizeof(struct IEcoUnknown*));
+    int16_t result = 0;
+
+    if (me == 0 || ppEnum == 0 ) {
+        return -1;
+    }
+
+    result = createCEcoLab1EnumConnectionPoints((IEcoUnknown*)pCMe->m_pISys, (struct IEcoConnectionPoint *)&pCMe->m_pISinkCP->m_pVTblICP, ppEnum);
+
+    return result;
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция FindConnectionPoint
+ * </сводка>
+ *
+ * <описание>
+ *   Находит точку подключения для заданного интерфейса событий
+ * </описание>
+ *
+ */
+int16_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_FindConnectionPoint(/* in */ struct IEcoConnectionPointContainer* me, /* in */ const UGUID* riid, /* out */ struct IEcoConnectionPoint **ppCP) {
+    CEcoLab1 *pCMe = (CEcoLab1*)((uint64_t)me - sizeof(struct IEcoLab1*) - sizeof(struct IEcoCalculatorY*) - sizeof(struct IEcoCalculatorX*) - sizeof(struct IEcoUnknown*));
+    int16_t result = 0;
+
+    if (me == 0 || ppCP == 0) {
+        return -1;
+    }
+
+    if (!IsEqualUGUID(riid, &IID_IEcoLab1Events)) {
+        *ppCP = 0;
+        return -1;
+    }
+
+    if (pCMe->m_pISinkCP == 0) {
+        return -1;
+    }
+
+    pCMe->m_pISinkCP->m_pVTblICP->AddRef((struct IEcoConnectionPoint *)&pCMe->m_pISinkCP->m_pVTblICP);
+    *ppCP =  (struct IEcoConnectionPoint *)&pCMe->m_pISinkCP->m_pVTblICP;
+
+    return 0;
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция Fire_OnSortSwap
+ * </сводка>
+ *
+ * <описание>
+ *   Генерация события OnSortSwap для всех подписанных sink’ов.
+ *   Перебираются все подключения через Connection Point,
+ *   для каждого sink вызывается соответствующий метод OnSortSwap.
+ * </описание>
+ *
+ */
+int16_t ECOCALLMETHOD CEcoLab1_Fire_OnSortSwap(/* in */ struct IEcoLab1* me, /* in */ int16_t indexSrc, /* in */ int16_t indexDst) {
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+    int16_t result = 0;
+    uint32_t count = 0;
+    uint32_t index = 0;
+    IEcoEnumConnections* pEnum = 0;
+    IEcoLab1Events* pIEvents = 0;
+    EcoConnectionData cd;
+
+    if (me == 0) {
+        return -1;
+    }
+
+    if (pCMe->m_pISinkCP != 0) {
+        result = ((IEcoConnectionPoint*)pCMe->m_pISinkCP)->pVTbl->EnumConnections((IEcoConnectionPoint*)pCMe->m_pISinkCP, &pEnum);
+        if ((result == 0) && (pEnum != 0)) {
+            while (pEnum->pVTbl->Next(pEnum, 1, &cd, 0) == 0) {
+                result = cd.pUnk->pVTbl->QueryInterface(cd.pUnk, &IID_IEcoLab1Events, (void**)&pIEvents);
+                if ((result == 0) && (pIEvents != 0)) {
+                    result = pIEvents->pVTbl->OnSortSwap(pIEvents, indexSrc, indexDst);
+                    pIEvents->pVTbl->Release(pIEvents);
+                }
+                cd.pUnk->pVTbl->Release(cd.pUnk);
+            }
+            pEnum->pVTbl->Release(pEnum);
+        }
+    }
+    return result;
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция Fire_OnSortCompare
+ * </сводка>
+ *
+ * <описание>
+ *   Генерация события OnSortCompare для всех подписанных sink’ов.
+ *   Перебираются все подключения через Connection Point,
+ *   для каждого sink вызывается метод OnSortCompare с результатом сравнения.
+ * </описание>
+ *
+ */
+
+int16_t ECOCALLMETHOD CEcoLab1_Fire_OnSortCompare(/* in */ struct IEcoLab1* me, /* in */ int16_t index1, /* in */ int16_t index2, /* in */ int16_t cmpResult) {
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+    int16_t result = 0;
+    uint32_t index = 0;
+    IEcoEnumConnections* pEnum = 0;
+    IEcoLab1Events* pIEvents = 0;
+    EcoConnectionData cd;
+
+    if (me == 0) {
+        return -1;
+    }
+
+    if (pCMe->m_pISinkCP != 0) {
+        result = ((IEcoConnectionPoint*)pCMe->m_pISinkCP)->pVTbl->EnumConnections((IEcoConnectionPoint*)pCMe->m_pISinkCP, &pEnum);
+        if ((result == 0) && (pEnum != 0)) {
+            while (pEnum->pVTbl->Next(pEnum, 1, &cd, 0) == 0) {
+                result = cd.pUnk->pVTbl->QueryInterface(cd.pUnk, &IID_IEcoLab1Events, (void**)&pIEvents);
+                if ((result == 0) && (pIEvents != 0)) {
+                    result = pIEvents->pVTbl->OnSortCompare(pIEvents, index1, index2, cmpResult);
+                    pIEvents->pVTbl->Release(pIEvents);
+                }
+                cd.pUnk->pVTbl->Release(cd.pUnk);
+            }
+            pEnum->pVTbl->Release(pEnum);
+        }
+    }
+    return result;
+}
+
+
+/*
+ *
+ * <сводка>
+ *   Функция Fire_OnSortStageStart
+ * </сводка>
+ *
+ * <описание>
+ *   Генерация события OnSortStageStart для всех подписанных sink’ов.
+ *   Перебираются все подключения через Connection Point,
+ *   для каждого sink вызывается метод OnSortStageStart с указанием номера этапа и направления сортировки.
+ * </описание>
+ *
+ */
+int16_t ECOCALLMETHOD CEcoLab1_Fire_OnSortStageStart(/* in */ struct IEcoLab1* me, /* in */ int16_t stage, /* in */ int16_t dir) {
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+    int16_t result = 0;
+    uint32_t index = 0;
+    IEcoEnumConnections* pEnum = 0;
+    IEcoLab1Events* pIEvents = 0;
+    EcoConnectionData cd;
+
+    if (me == 0) {
+        return -1;
+    }
+
+    if (pCMe->m_pISinkCP != 0) {
+        result = ((IEcoConnectionPoint*)pCMe->m_pISinkCP)->pVTbl->EnumConnections((IEcoConnectionPoint*)pCMe->m_pISinkCP, &pEnum);
+        if ((result == 0) && (pEnum != 0)) {
+            while (pEnum->pVTbl->Next(pEnum, 1, &cd, 0) == 0) {
+                result = cd.pUnk->pVTbl->QueryInterface(cd.pUnk, &IID_IEcoLab1Events, (void**)&pIEvents);
+                if ((result == 0) && (pIEvents != 0)) {
+                    result = pIEvents->pVTbl->OnSortStageStart(pIEvents, stage, dir);
+                    pIEvents->pVTbl->Release(pIEvents);
+                }
+                cd.pUnk->pVTbl->Release(cd.pUnk);
+            }
+            pEnum->pVTbl->Release(pEnum);
+        }
+    }
+    return result;
+}
+
+/*
+ *
+ * <сводка>
  *   Побайтное копирование: copyByte
  * </сводка>
  *
@@ -337,13 +598,22 @@ static size_t next_power_of_two_size(size_t n) {
  *
  */
 static void bitonic_compare_and_swap(char *base, size_t elemSize, size_t i, size_t j, int dir,
-                                     int (__cdecl *compare)(const void *, const void *), char *tmp) {
+                                     int (__cdecl *compare)(const void *, const void *), char *tmp, struct IEcoLab1* me) {
     char *pi = base + i * elemSize;
     char *pj = base + j * elemSize;
     int cmp = compare((const void*)pi, (const void*)pj);
+	
+    /* Fire compare event */
+    if (me != 0) {
+        CEcoLab1_Fire_OnSortCompare(me, (int16_t)i, (int16_t)j, (int16_t)cmp);
+    }
 
     if (dir == 1) { /* ascending */
         if (cmp > 0) {
+            /* Fire swap event */
+            if (me != 0) {
+                CEcoLab1_Fire_OnSortSwap(me, (int16_t)i, (int16_t)j);
+            }
             /* swap pi <-> pj using tmp */
             copyByte(pj, tmp, elemSize);
             copyByte(pi, pj, elemSize);
@@ -351,6 +621,10 @@ static void bitonic_compare_and_swap(char *base, size_t elemSize, size_t i, size
         }
     } else { /* descending */
         if (cmp < 0) {
+            /* Fire swap event */
+            if (me != 0) {
+                CEcoLab1_Fire_OnSortSwap(me, (int16_t)i, (int16_t)j);
+            }
             copyByte(pj, tmp, elemSize);
             copyByte(pi, pj, elemSize);
             copyByte(tmp, pi, elemSize);
@@ -372,15 +646,15 @@ static void bitonic_compare_and_swap(char *base, size_t elemSize, size_t i, size
  *
  */
 static void bitonic_merge_recursive(char *base, size_t elemSize, size_t low, size_t cnt, int dir,
-                                    int (__cdecl *compare)(const void *, const void *), char *tmp) {
+                                    int (__cdecl *compare)(const void *, const void *), char *tmp, struct IEcoLab1* me) {
     if (cnt > 1) {
         size_t k = cnt / 2;
         size_t i;
         for (i = low; i < low + k; ++i) {
-            bitonic_compare_and_swap(base, elemSize, i, i + k, dir, compare, tmp);
+            bitonic_compare_and_swap(base, elemSize, i, i + k, dir, compare, tmp, me);
         }
-        bitonic_merge_recursive(base, elemSize, low, k, dir, compare, tmp);
-        bitonic_merge_recursive(base, elemSize, low + k, k, dir, compare, tmp);
+        bitonic_merge_recursive(base, elemSize, low, k, dir, compare, tmp, me);
+        bitonic_merge_recursive(base, elemSize, low + k, k, dir, compare, tmp, me);
     }
 }
 
@@ -400,13 +674,17 @@ static void bitonic_merge_recursive(char *base, size_t elemSize, size_t low, siz
  *
  */
 static void bitonic_sort_recursive(char *base, size_t elemSize, size_t low, size_t cnt, int dir,
-                                   int (__cdecl *compare)(const void *, const void *), char *tmp) {
+                                   int (__cdecl *compare)(const void *, const void *), char *tmp, struct IEcoLab1* me) {
     if (cnt > 1) {
         size_t k = cnt / 2;
+        /* Fire stage start event */
+        if (me != 0) {
+            CEcoLab1_Fire_OnSortStageStart(me, (int16_t)cnt, (int16_t)dir);
+        }
         /* первая половина — ascending (1), вторая — descending (0) */
-        bitonic_sort_recursive(base, elemSize, low, k, 1, compare, tmp);
-        bitonic_sort_recursive(base, elemSize, low + k, k, 0, compare, tmp);
-        bitonic_merge_recursive(base, elemSize, low, cnt, dir, compare, tmp);
+        bitonic_sort_recursive(base, elemSize, low, k, 1, compare, tmp, me);
+        bitonic_sort_recursive(base, elemSize, low + k, k, 0, compare, tmp, me);
+        bitonic_merge_recursive(base, elemSize, low, cnt, dir, compare, tmp, me);
     }
 }
 
@@ -522,7 +800,7 @@ static int16_t CEcoLab1_bitonicSort_generic(/* in */ struct IEcoLab1* me,
     }
 
     /* сортируем (ascending: dir = 1, descending: dir = 0) */
-    bitonic_sort_recursive(buffer, elemSize, 0, m, ascending ? 1 : 0, compare, tmp);
+    bitonic_sort_recursive(buffer, elemSize, 0, m, ascending ? 1 : 0, compare, tmp, me);
 
     /* удаляем блок нулевого паддинга */
     if (len_pad > 0) {
@@ -682,7 +960,7 @@ int16_t ECOCALLMETHOD CEcoLab1_bitonicSort_longdouble(/* in */ struct IEcoLab1* 
  * </описание>
  *
  */
-int16_t ECOCALLMETHOD initCEcoLab1(/*in*/ IEcoLab1Ptr_t me, /* in */ struct IEcoUnknown *pIUnkSystem) {
+int16_t ECOCALLMETHOD initCEcoLab1(/*in*/ struct IEcoLab1* me, /* in */ struct IEcoUnknown *pIUnkSystem) {
     CEcoLab1* pCMe = (CEcoLab1*)me;
     IEcoInterfaceBus1* pIBus = 0;
 	IEcoUnknown* pOuterUnknown = (IEcoUnknown*)me;
@@ -729,6 +1007,13 @@ int16_t ECOCALLMETHOD initCEcoLab1(/*in*/ IEcoLab1Ptr_t me, /* in */ struct IEco
 	result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoCalculatorE, 0, &IID_IEcoCalculatorY, (void**)&pCMe->m_pIY_E);
 	if (result != 0) pCMe->m_pIY_E = 0;
 
+    /* Создание точки подключения для событий сортировки */
+    result = createCEcoLab1ConnectionPoint((IEcoUnknown*)pCMe->m_pISys, (IEcoConnectionPointContainer*)&pCMe->m_pVTblICPC, &IID_IEcoLab1Events, (IEcoConnectionPoint**)&((pCMe)->m_pISinkCP));
+	if (result == 0 && pCMe->m_pISinkCP != 0) {
+        result = 0;
+    } 
+    
+
     /* Освобождение */
     pIBus->pVTbl->Release(pIBus);
 
@@ -770,6 +1055,15 @@ IEcoUnknownVTbl g_x000000000000000000000000000000AAVTblLab1 = {
     CEcoLab1_NondelegatingQueryInterface,
     CEcoLab1_NondelegatingAddRef,
     CEcoLab1_NondelegatingRelease
+};
+
+/* Create Virtual Table IEcoConnectionPointContainer */
+IEcoConnectionPointContainerVTbl g_x0000000500000000C000000000000046VTblCPC = {
+    CEcoLab1_IEcoConnectionPointContainer_QueryInterface,
+    CEcoLab1_IEcoConnectionPointContainer_AddRef,
+    CEcoLab1_IEcoConnectionPointContainer_Release,
+    CEcoLab1_IEcoConnectionPointContainer_EnumConnectionPoints,
+    CEcoLab1_IEcoConnectionPointContainer_FindConnectionPoint
 };
 
 /*
@@ -844,6 +1138,7 @@ int16_t ECOCALLMETHOD createCEcoLab1(/* in */ IEcoUnknown* pIUnkSystem, /* in */
 	pCMe->m_pVTblIY = &g_xBD6414C29096423EA90C04D77AFD1CADVTblLab1;
 	pCMe->m_pVTblIX = &g_x9322111622484742AE0682819447843DVTblLab1;
 	pCMe->m_pVTblINondelegatingUnk = &g_x000000000000000000000000000000AAVTblLab1;
+	pCMe->m_pVTblICPC = &g_x0000000500000000C000000000000046VTblCPC;
 
 	// Настраиваем поддержку агрегирования 
 	pCMe->m_pIUnkOuter = 0;
@@ -859,6 +1154,7 @@ int16_t ECOCALLMETHOD createCEcoLab1(/* in */ IEcoUnknown* pIUnkSystem, /* in */
 	pCMe->m_pIX_C = 0;
 	pCMe->m_pIY_E = 0;
 	pCMe->m_pIY_D = 0;
+	pCMe->m_pISinkCP = 0;
 
     /* Инициализация данных */
     pCMe->m_Name = 0;
@@ -910,6 +1206,9 @@ void ECOCALLMETHOD deleteCEcoLab1(/* in */ IEcoLab1* pIEcoLab1) {
 		}
         if ( pCMe->m_pISys != 0 ) {
             pCMe->m_pISys->pVTbl->Release(pCMe->m_pISys);
+        }
+        if ( pCMe->m_pISinkCP != 0 ) {
+            ((IEcoConnectionPoint*)pCMe->m_pISinkCP)->pVTbl->Release((IEcoConnectionPoint*)pCMe->m_pISinkCP);
         }
         pIMem->pVTbl->Free(pIMem, pCMe);
         pIMem->pVTbl->Release(pIMem);
