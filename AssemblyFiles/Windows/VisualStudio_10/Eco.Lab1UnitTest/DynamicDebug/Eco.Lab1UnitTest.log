@@ -1,4 +1,4 @@
-﻿Build started 21.11.2025 22:26:30.
+﻿Build started 22.11.2025 13:15:26.
      1>Project "C:\Users\User\laba3\EcoLab1\AssemblyFiles\Windows\VisualStudio_10\Eco.Lab1UnitTest.vcxproj" on node 3 (rebuild target(s)).
      1>_PrepareForClean:
          Deleting file "Eco.Lab1UnitTest\DynamicDebug\Eco.Lab1UnitTest.lastbuildstate".
@@ -44,4 +44,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.90
+Time Elapsed 00:00:00.94

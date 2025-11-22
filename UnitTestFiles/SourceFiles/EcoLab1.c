@@ -319,7 +319,7 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
 		pIX = 0;
 		pIY = 0;
 
-		printf("\n========== LAB1 TESTS ==========\n\n");
+		printf("\n========== LAB2 TESTS ==========\n\n");
 
 		// Получаем компонент
 		result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**)&pIEcoLab1);
@@ -479,7 +479,6 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
 			pIX->pVTbl->Release(pIX);
 		}
 
-		printf("\n========== END LAB1 TESTS ==========\n\n\n\n");
     }
 
 
@@ -489,8 +488,6 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
 		IEcoCalculatorY* pIY_Lab2 = 0;
 		IEcoLab1* pIEcoLab1_FromLab2 = 0;
 		pIEcoLab2 = 0;
-
-		printf("\n========== LAB2 TESTS ==========\n\n");
 
 		/* ======= TEST 1: Базовые операции Lab2 (Bitonic Sort для int) ======= */
 		printf("--- Test 1: Lab2 bitonicSort_int ---\n");

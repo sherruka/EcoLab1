@@ -392,8 +392,12 @@ int16_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_EnumConnectionPoints
  * </описание>
  *
  */
-int16_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_FindConnectionPoint(/* in */ struct IEcoConnectionPointContainer* me, /* in */ const UGUID* riid, /* out */ struct IEcoConnectionPoint **ppCP) {
-    CEcoLab1 *pCMe = (CEcoLab1*)((uint64_t)me - sizeof(struct IEcoLab1*) - sizeof(struct IEcoCalculatorY*) - sizeof(struct IEcoCalculatorX*) - sizeof(struct IEcoUnknown*));
+int16_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_FindConnectionPoint(/* in */ struct IEcoConnectionPointContainer* me, 
+    /* in */ const UGUID* riid, /* out */ struct IEcoConnectionPoint **ppCP) {
+
+    CEcoLab1 *pCMe = (CEcoLab1*)((uint64_t)me - sizeof(struct IEcoLab1*) - sizeof(struct IEcoCalculatorY*) 
+    - sizeof(struct IEcoCalculatorX*) - sizeof(struct IEcoUnknown*));
+    
     int16_t result = 0;
 
     if (me == 0 || ppCP == 0) {
@@ -414,7 +418,6 @@ int16_t ECOCALLMETHOD CEcoLab1_IEcoConnectionPointContainer_FindConnectionPoint(
 
     return 0;
 }
-
 /*
  *
  * <сводка>
